@@ -1,0 +1,52 @@
+clc;
+clear;
+H = 2; L = 4;b=8; d = H*0.99999;
+Im = 16; Jm = 50;
+dkes = 1 / (Im - 1); deta = 1 / (Jm - 1);
+
+for i = 1:Im
+    for j = 1:Jm
+        kes = dkes * (i - 1); eta = deta * (j - 1);
+        x(i, j) = kes * L;
+        dh=d/H;
+        s=1+(exp(b)-1)*dh;
+        m=1+(exp(-b)-1)*dh;
+        a=1/(2*b)*log(s/m);
+        y(i, j) =d*(1+sinh(b*(eta-a))/sinh(b*a));
+    end
+end
+
+for i = 1:Im
+    for j = 1:Jm
+
+        if i == 1
+            xk = (-3 * x(i, j) + 4 * x(i + 1, j) - x(i + 2, j)) / (2 * dkes);
+            yk = (-3 * y(i, j) + 4 * y(i + 1, j) - y(i + 2, j)) / (2 * dkes);
+        elseif i == Im
+            xk = (x(i - 2, j) - 4 * x(i - 1, j) + 3 * x(i, j)) / (2 * dkes);
+            yk = (y(i - 2, j) - 4 * y(i - 1, j) + 3 * y(i, j)) / (2 * dkes);
+        else
+            xk = (x(i + 1, j) - x(i - 1, j)) / (2 * dkes);
+            yk = (y(i + 1, j) - y(i - 1, j)) / (2 * dkes);
+        end
+        if j == 1
+            xe = (-3 * x(i, j) + 4 * x(i, j + 1) - x(i, j + 2)) / (2 * deta);
+            ye = (-3 * y(i, j) + 4 * y(i, j + 1) - y(i, j + 2)) / (2 * deta);
+        elseif j == Jm
+            xe = (x(i, j - 2) - 4 * x(i, j - 1) + 3 * x(i, j)) / (2 * deta);
+            ye = (y(i, j - 2) - 4 * y(i, j - 1) + 3 * y(i, j)) / (2 * deta);
+        else
+            xe = (x(i, j + 1) - x(i, j - 1)) / (2 * deta);
+            ye = (y(i, j + 1) - y(i, j - 1)) / (2 * deta);
+        end
+        Jac = 1 / (xk * ye - yk * xe);
+        kx(i, j) = Jac * ye;
+        ky(i, j) = -Jac * xe;
+        ex(i, j) = -Jac * yk;
+        ey(i, j) = Jac * xk;
+       
+    end
+end
+
+surface(x, y, y * 0);
+
